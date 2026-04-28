@@ -47,6 +47,14 @@ TEST(GregorianDateTest, AddDays_SameMonth)
     ExpectDateEq(result, 2024, GregorianMonth::March, 15);
 }
 
+TEST(GregorianDateTest, AddDays_NextDay)
+{
+    GregorianDate d(2024, GregorianMonth::March, 10);
+    auto result = d.addDays(1);
+
+    ExpectDateEq(result, 2024, GregorianMonth::March, 11);
+}
+
 TEST(GregorianDateTest, AddDays_CrossMonth)
 {
     GregorianDate d(2024, GregorianMonth::March, 28);

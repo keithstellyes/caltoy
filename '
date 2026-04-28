@@ -4,20 +4,15 @@
 void printYear(LunarYear ly)
 {
     GregorianDate today(ly.gregorianYear, GregorianMonth::January, 1);
-    std::cout << "January\n";
     for(const LunarPhase &phase : ly.getPhases()) {
         GregorianDate tmo = today.addDays(1);
-        if(today.month != tmo.month) {
-            std::cout << '\n' << tmo.month << '\n';
-        }
+        std::cout << today.month << " " << today.day;
         today = tmo;
-        std::cout << to_utf8(unicodeCodepoint(phase));
+        std::cout << to_utf8(unicodeCodepoint(phase)) << '\n';
     }
 }
 
 int main(int argc, const char *argv[])
 {
     printYear(LunarYear(2026, GregorianDate(2025, GregorianMonth::December, 19)));
-    std::cout << std::endl;
-    return 0;
 }

@@ -38,6 +38,40 @@ constexpr std::string_view to_string(LunarPhase phase)
     return "Unknown"; // fallback for invalid values
 }
 
+constexpr char32_t unicodeCodepoint(LunarPhase phase)
+{
+    return 127761 + static_cast<int>(phase);
+}
+std::string to_utf8(char32_t codepoint)
+{
+    std::string out;
+
+    if (codepoint <= 0x7F)
+    {
+        out.push_back(static_cast<char>(codepoint));
+    }
+    else if (codepoint <= 0x7FF)
+    {
+        out.push_back(static_cast<char>(0xC0 | (codepoint >> 6)));
+        out.push_back(static_cast<char>(0x80 | (codepoint & 0x3F)));
+    }
+    else if (codepoint <= 0xFFFF)
+    {
+        out.push_back(static_cast<char>(0xE0 | (codepoint >> 12)));
+        out.push_back(static_cast<char>(0x80 | ((codepoint >> 6) & 0x3F)));
+        out.push_back(static_cast<char>(0x80 | (codepoint & 0x3F)));
+    }
+    else
+    {
+        out.push_back(static_cast<char>(0xF0 | (codepoint >> 18)));
+        out.push_back(static_cast<char>(0x80 | ((codepoint >> 12) & 0x3F)));
+        out.push_back(static_cast<char>(0x80 | ((codepoint >> 6) & 0x3F)));
+        out.push_back(static_cast<char>(0x80 | (codepoint & 0x3F)));
+    }
+
+    return out;
+}
+
 inline std::ostream& operator<<(std::ostream& os, LunarPhase phase)
 {
     return os << to_string(phase);
@@ -57,6 +91,32 @@ enum class GregorianMonth {
     November,
     December
 };
+
+constexpr std::string_view to_string(GregorianMonth month)
+{
+    switch (month)
+    {
+        case GregorianMonth::January:   return "January";
+        case GregorianMonth::February:  return "February";
+        case GregorianMonth::March:     return "March";
+        case GregorianMonth::April:     return "April";
+        case GregorianMonth::May:       return "May";
+        case GregorianMonth::June:      return "June";
+        case GregorianMonth::July:      return "July";
+        case GregorianMonth::August:    return "August";
+        case GregorianMonth::September: return "September";
+        case GregorianMonth::October:   return "October";
+        case GregorianMonth::November:  return "November";
+        case GregorianMonth::December:  return "December";
+    }
+
+    return "Unknown";
+}
+inline std::ostream& operator<<(std::ostream& os, GregorianMonth month)
+{
+    return os << to_string(month);
+}
+
 constexpr uint8_t daysInGregorianMonth(GregorianMonth month, bool isLeapYear)
 {
     switch(month)
@@ -183,7 +243,6 @@ class LunarYear
                     phases.push_back(static_cast<LunarPhase>(bucket));
                 }
 
-                std::cout << percentageThroughLunation << "," <<  phases[phases.size() - 1] << '\n';
             }
 
             return phases;
