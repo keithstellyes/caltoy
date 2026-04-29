@@ -1,19 +1,22 @@
 CXX := g++
 CXXFLAGS := -std=c++23 -Wall -Wextra -pedantic -O2 -MMD -MP
+CXXFLAGS += $(shell pkg-config --cflags Qt6Widgets)
 
 # Targets
-TARGETS := tests lunar-for-year
+TARGETS := tests lunar-for-year lunar-calendar-qt
 
 # Source files
 TEST_SRCS := tests.cpp
 LUNAR_SRCS := lunar-for-year.cpp
+LUNAR_CAL_SRCS := lunar-calendar-qt.cpp
 
 # Object files
 TEST_OBJS := $(TEST_SRCS:.cpp=.o)
 LUNAR_OBJS := $(LUNAR_SRCS:.cpp=.o)
+LUNAR_CAL_OBJS := $(LUNAR_CAL_SRCS:.cpp=.o)
 
 # Dependency files
-DEPS := $(TEST_OBJS:.o=.d) $(LUNAR_OBJS:.o=.d)
+DEPS := $(TEST_OBJS:.o=.d) $(LUNAR_OBJS:.o=.d) $(LUNAR_CAL_OBJS:.o=.d)
 
 # Default target
 all: $(TARGETS)
@@ -24,6 +27,9 @@ tests: $(TEST_OBJS)
 
 lunar-for-year: $(LUNAR_OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $^
+
+lunar-calendar-qt: $(LUNAR_CAL_OBJS)
+	$(CXX) $(CXXFLAGS) $(shell pkg-config --libs Qt6Widgets) -o $@ $^
 
 # Compile rule
 %.o: %.cpp

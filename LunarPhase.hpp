@@ -42,6 +42,8 @@ constexpr char32_t unicodeCodepoint(LunarPhase phase)
 {
     return 127761 + static_cast<int>(phase);
 }
+
+// I don't know, chatgpt figured this out
 std::string to_utf8(char32_t codepoint)
 {
     std::string out;
