@@ -155,6 +155,16 @@ constexpr bool yearIsLeapYear(int year)
     return (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
 }
 
+enum class GregorianDayOfWeek {
+    Sunday,
+    Monday,
+    Tuesday,
+    Wednesday,
+    Thursday,
+    Friday,
+    Saturday
+};
+
 class GregorianDate
 {
     public:
@@ -182,6 +192,16 @@ class GregorianDate
             int nextYear = year + (nextMonth == GregorianMonth::January ? 1 : 0);
             int daysToReachEndOfMonth = daysInGregorianMonth(month, isLeapYear()) - this->day + 1;
             return GregorianDate(nextYear, nextMonth, 1).addDays(days - daysToReachEndOfMonth);
+        }
+
+        // Sakamoto algorithm? https://stackoverflow.com/a/905468
+        constexpr GregorianDayOfWeek getDayOfWeek() const
+        {
+            int m = static_cast<int>(month) + 1;
+            int t[] = {0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4};
+            int y = year;
+            y -= m < 3;
+            return static_cast<GregorianDayOfWeek>((y + y/4 - y/100 + y/400 + t[m-1] + day) % 7);
         }
 };
 

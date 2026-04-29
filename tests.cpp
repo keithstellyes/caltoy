@@ -118,6 +118,12 @@ TEST(GregorianDateTest, AddDays_LargeSpan_LeapYear)
     ExpectDateEq(result, 2025, GregorianMonth::January, 1);
 }
 
+TEST(GregorianDateTest, DayOfWeek)
+{
+    GregorianDate d(1995, GregorianMonth::June, 30);
+    EXPECT_EQ(d.getDayOfWeek(), GregorianDayOfWeek::Friday);
+}
+
 int main(int argc, char** argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
