@@ -64,6 +64,7 @@ int main(int argc, char *argv[])
     LunarMonthView monthView(LunarYear(2026, GregorianDate(2025, GregorianMonth::December, 19)), month);
     monthView.resize(300, 600);
     monthView.show();
+    monthView.setWindowTitle("Lunar Calendar");
 
     return app.exec();
 }

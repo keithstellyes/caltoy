@@ -263,6 +263,16 @@ class LunarYear
                             break;
                     }
                     phases.push_back(static_cast<LunarPhase>(bucket));
+                    if(phases.size() > 1) {
+                        if(phases[phases.size() - 1] == LunarPhase::WaningGibbous && phases[phases.size() - 2] == LunarPhase::WaxingGibbous) {
+                            // sometimes waxing skips to waning, we'll need to do for the other "just 1 day" cases like last quarter & first quarter too I bet
+                            phases[phases.size() - 1] = LunarPhase::FullMoon;
+                        } else if(phases[phases.size() - 1] == LunarPhase::WaxingCrescent && phases[phases.size() - 2] == LunarPhase::WaningCrescent) {
+                            phases[phases.size() - 1] = LunarPhase::NewMoon;
+                        } else if(phases[phases.size() - 1] == LunarPhase::WaxingGibbous && phases[phases.size() - 2] == LunarPhase::WaxingCrescent) {
+                            phases[phases.size() - 1] = LunarPhase::FirstQuarter;
+                        }
+                    }
                 }
 
             }
