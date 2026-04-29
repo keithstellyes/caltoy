@@ -1,19 +1,41 @@
-CXX = g++
-CXXFLAGS = -std=c++20 -Wall -Wextra -pedantic -O2
-LDFLAGS = -lgtest
+CXX := g++
+CXXFLAGS := -std=c++23 -Wall -Wextra -pedantic -O2 -MMD -MP
 
-TARGET = tests lunar-for-year
+# Targets
+TARGETS := tests lunar-for-year
 
-SRCS = tests.cpp LunarPhase.cpp lunar-for-year.cpp
-OBJS = $(SRCS:.cpp=.o)
+# Source files
+TEST_SRCS := tests.cpp
+LUNAR_SRCS := lunar-for-year.cpp
 
-all: $(TARGET)
+# Object files
+TEST_OBJS := $(TEST_SRCS:.cpp=.o)
+LUNAR_OBJS := $(LUNAR_SRCS:.cpp=.o)
 
-$(TARGET): $(OBJS)
-	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJS) $(LDFLAGS)
+# Dependency files
+DEPS := $(TEST_OBJS:.o=.d) $(LUNAR_OBJS:.o=.d)
 
-%.o: %.cpp LunarPhase.hpp
+# Default target
+all: $(TARGETS)
+
+# Link targets
+tests: $(TEST_OBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $^ -lgtest
+
+lunar-for-year: $(LUNAR_OBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $^
+
+# Compile rule
+%.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
+# Include dependency files if they exist
+-include $(DEPS)
+
+# Clean
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -f *.o *.d $(TARGETS)
+
+rebuild: clean all
+
+.PHONY: all clean rebuild

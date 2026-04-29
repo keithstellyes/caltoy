@@ -1,1 +1,4 @@
 *.o
+lunar-for-year
+*.d
+tests
