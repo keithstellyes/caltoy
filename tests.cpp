@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
-#include "LunarPhase.hpp"
+#include "lunar.hpp"
 
 // --- Helper for comparisons ---
-static void ExpectDateEq(const GregorianDate& d, int y, GregorianMonth m, uint8_t day)
+static void ExpectDateEq(const gregorian::Date& d, int y, gregorian::Month m, uint8_t day)
 {
     EXPECT_EQ(d.year, y);
     EXPECT_EQ(d.month, m);
@@ -13,27 +13,27 @@ static void ExpectDateEq(const GregorianDate& d, int y, GregorianMonth m, uint8_
 
 TEST(GregorianDateTest, DefaultConstructor)
 {
-    GregorianDate d;
-    ExpectDateEq(d, 2026, GregorianMonth::January, 1);
+    gregorian::Date d;
+    ExpectDateEq(d, 2026, gregorian::Month::January, 1);
 }
 
 TEST(GregorianDateTest, ParameterizedConstructor)
 {
-    GregorianDate d(2024, GregorianMonth::March, 15);
-    ExpectDateEq(d, 2024, GregorianMonth::March, 15);
+    gregorian::Date d(2024, gregorian::Month::March, 15);
+    ExpectDateEq(d, 2024, gregorian::Month::March, 15);
 }
 
 // --- Leap year tests ---
 
 TEST(GregorianDateTest, LeapYear_True)
 {
-    GregorianDate d(2024, GregorianMonth::January, 1);
+    gregorian::Date d(2024, gregorian::Month::January, 1);
     EXPECT_TRUE(d.isLeapYear());
 }
 
 TEST(GregorianDateTest, LeapYear_False)
 {
-    GregorianDate d(2023, GregorianMonth::January, 1);
+    gregorian::Date d(2023, gregorian::Month::January, 1);
     EXPECT_FALSE(d.isLeapYear());
 }
 
@@ -41,87 +41,104 @@ TEST(GregorianDateTest, LeapYear_False)
 
 TEST(GregorianDateTest, AddDays_SameMonth)
 {
-    GregorianDate d(2024, GregorianMonth::March, 10);
+    gregorian::Date d(2024, gregorian::Month::March, 10);
     auto result = d.addDays(5);
 
-    ExpectDateEq(result, 2024, GregorianMonth::March, 15);
+    ExpectDateEq(result, 2024, gregorian::Month::March, 15);
 }
 
 TEST(GregorianDateTest, AddDays_NextDay)
 {
-    GregorianDate d(2024, GregorianMonth::March, 10);
+    gregorian::Date d(2024, gregorian::Month::March, 10);
     auto result = d.addDays(1);
 
-    ExpectDateEq(result, 2024, GregorianMonth::March, 11);
+    ExpectDateEq(result, 2024, gregorian::Month::March, 11);
 }
 
 TEST(GregorianDateTest, AddDays_CrossMonth)
 {
-    GregorianDate d(2024, GregorianMonth::March, 28);
+    gregorian::Date d(2024, gregorian::Month::March, 28);
     auto result = d.addDays(5);
 
-    ExpectDateEq(result, 2024, GregorianMonth::April, 2);
+    ExpectDateEq(result, 2024, gregorian::Month::April, 2);
 }
 
 // --- February / leap year edge cases ---
 
 TEST(GregorianDateTest, AddDays_February_NonLeap)
 {
-    GregorianDate d(2023, GregorianMonth::February, 27);
+    gregorian::Date d(2023, gregorian::Month::February, 27);
     auto result = d.addDays(2);
 
-    ExpectDateEq(result, 2023, GregorianMonth::March, 1);
+    ExpectDateEq(result, 2023, gregorian::Month::March, 1);
 }
 
 TEST(GregorianDateTest, AddDays_February_Leap)
 {
-    GregorianDate d(2024, GregorianMonth::February, 27);
+    gregorian::Date d(2024, gregorian::Month::February, 27);
     auto result = d.addDays(2);
 
-    ExpectDateEq(result, 2024, GregorianMonth::February, 29);
+    ExpectDateEq(result, 2024, gregorian::Month::February, 29);
 }
 
 TEST(GregorianDateTest, AddDays_February_Leap_Cross)
 {
-    GregorianDate d(2024, GregorianMonth::February, 28);
+    gregorian::Date d(2024, gregorian::Month::February, 28);
     auto result = d.addDays(2);
 
-    ExpectDateEq(result, 2024, GregorianMonth::March, 1);
+    ExpectDateEq(result, 2024, gregorian::Month::March, 1);
 }
 
 // --- Year boundary ---
 
 TEST(GregorianDateTest, AddDays_EndOfYear)
 {
-    GregorianDate d(2023, GregorianMonth::December, 31);
+    gregorian::Date d(2023, gregorian::Month::December, 31);
     auto result = d.addDays(1);
 
-    ExpectDateEq(result, 2024, GregorianMonth::January, 1);
+    ExpectDateEq(result, 2024, gregorian::Month::January, 1);
 }
 
-// --- Large additions ---
 
 TEST(GregorianDateTest, AddDays_LargeSpan)
 {
-    GregorianDate d(2023, GregorianMonth::January, 1);
+    gregorian::Date d(2023, gregorian::Month::January, 1);
     auto result = d.addDays(365);
 
     // 2023 is not a leap year
-    ExpectDateEq(result, 2024, GregorianMonth::January, 1);
+    ExpectDateEq(result, 2024, gregorian::Month::January, 1);
 }
 
 TEST(GregorianDateTest, AddDays_LargeSpan_LeapYear)
 {
-    GregorianDate d(2024, GregorianMonth::January, 1);
+    gregorian::Date d(2024, gregorian::Month::January, 1);
     auto result = d.addDays(366);
 
-    ExpectDateEq(result, 2025, GregorianMonth::January, 1);
+    ExpectDateEq(result, 2025, gregorian::Month::January, 1);
 }
 
 TEST(GregorianDateTest, DayOfWeek)
 {
-    GregorianDate d(1995, GregorianMonth::June, 30);
-    EXPECT_EQ(d.getDayOfWeek(), GregorianDayOfWeek::Friday);
+    gregorian::Date d(1995, gregorian::Month::June, 30);
+    EXPECT_EQ(d.getDayOfWeek(), gregorian::DayOfWeek::Friday);
+}
+
+TEST(GregorianDateTest, DayOfYear)
+{
+    gregorian::Date d(2026, gregorian::Month::December, 31);
+    EXPECT_EQ(d.getDayOfYear(), 365);
+}
+
+TEST(LunarPhaseTest, LunarPhaseTable)
+{
+    EXPECT_EQ(lunar::lookupLastNewMoonInPriorYear(2026).value(), gregorian::Date(2025, gregorian::Month::December, 19));
+}
+
+TEST(LunarPhaseTest, LunarPhaseCalculation)
+{
+    EXPECT_EQ(lunar::Year(2026).getPhases()[2], lunar::Phase::FullMoon);
+    EXPECT_EQ(lunar::Year(2026).getPhases()[364], lunar::Phase::WaningCrescent);
+    EXPECT_EQ(lunar::Year(2026).getPhase(gregorian::Date(2026, gregorian::Month::December, 31)), lunar::Phase::WaningCrescent);
 }
 
 int main(int argc, char** argv)

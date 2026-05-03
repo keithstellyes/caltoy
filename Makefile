@@ -1,5 +1,5 @@
 CXX := g++
-CXXFLAGS := -std=c++23 -Wall -Wextra -pedantic -O2 -MMD -MP
+CXXFLAGS := -std=c++23 -Wall -Wextra -pedantic -O2 -MMD -MP -fPIC
 CXXFLAGS += $(shell pkg-config --cflags Qt6Widgets)
 
 # Targets
