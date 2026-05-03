@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "lunar.hpp"
+#include "easter.hpp"
 
 // --- Helper for comparisons ---
 static void ExpectDateEq(const gregorian::Date& d, int y, gregorian::Month m, uint8_t day)
@@ -139,6 +140,12 @@ TEST(LunarPhaseTest, LunarPhaseCalculation)
     EXPECT_EQ(lunar::Year(2026).getPhases()[2], lunar::Phase::FullMoon);
     EXPECT_EQ(lunar::Year(2026).getPhases()[364], lunar::Phase::WaningCrescent);
     EXPECT_EQ(lunar::Year(2026).getPhase(gregorian::Date(2026, gregorian::Month::December, 31)), lunar::Phase::WaningCrescent);
+}
+
+TEST(EasterTest, EasterCalc)
+{
+    EXPECT_EQ(gregorian::getEaster(2025), gregorian::Date(2025, gregorian::Month::April, 20));
+    EXPECT_EQ(gregorian::getEaster(2026), gregorian::Date(2026, gregorian::Month::April, 5));
 }
 
 int main(int argc, char** argv)

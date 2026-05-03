@@ -18,35 +18,33 @@ namespace lunar {
         LastQuarter,
         WaningCrescent
     };
-
-#define UNIQUE_PHASE_COUNT 8
-
-    constexpr std::string_view to_string(Phase phase)
+}
+constexpr std::string_view to_string(lunar::Phase phase)
+{
+    switch (phase)
     {
-        switch (phase)
-        {
-            case Phase::NewMoon:         return "New Moon";
-            case Phase::WaxingCrescent:  return "Waxing Crescent";
-            case Phase::FirstQuarter:    return "First Quarter";
-            case Phase::WaxingGibbous:   return "Waxing Gibbous";
-            case Phase::FullMoon:        return "Full Moon";
-            case Phase::WaningGibbous:   return "Waning Gibbous";
-            case Phase::LastQuarter:     return "Last Quarter";
-            case Phase::WaningCrescent:  return "Waning Crescent";
-        }
-
-        return "Unknown"; // fallback for invalid values
+        case lunar::Phase::NewMoon:         return "New Moon";
+        case lunar::Phase::WaxingCrescent:  return "Waxing Crescent";
+        case lunar::Phase::FirstQuarter:    return "First Quarter";
+        case lunar::Phase::WaxingGibbous:   return "Waxing Gibbous";
+        case lunar::Phase::FullMoon:        return "Full Moon";
+        case lunar::Phase::WaningGibbous:   return "Waning Gibbous";
+        case lunar::Phase::LastQuarter:     return "Last Quarter";
+        case lunar::Phase::WaningCrescent:  return "Waning Crescent";
     }
 
+    return "Unknown"; // fallback for invalid values
+}
+inline std::ostream& operator<<(std::ostream& os, lunar::Phase phase)
+{
+    return os << to_string(phase);
+}
+
+namespace lunar {
+#define UNIQUE_PHASE_COUNT 8
     constexpr char32_t unicodeCodepoint(Phase phase)
     {
         return 127761 + static_cast<int>(phase);
-    }
-
-
-    inline std::ostream& operator<<(std::ostream& os, Phase phase)
-    {
-        return os << to_string(phase);
     }
 
     std::optional<gregorian::Date> lookupLastNewMoonInPriorYear(int year)
@@ -155,3 +153,5 @@ namespace lunar {
             }
     };
 }
+
+
