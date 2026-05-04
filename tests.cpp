@@ -42,6 +42,12 @@ TEST(GregorianDateTest, AddDays_SameMonth)
     ExpectDateEq(result, 2024, gregorian::Month::March, 15);
 }
 
+TEST(GregorianDateTest, AddDays_FirstNextMonth)
+{
+    gregorian::Date d(2026, gregorian::Month::January, 1);
+    EXPECT_EQ(d.addDays(31), gregorian::Date(2026, gregorian::Month::February, 1));
+}
+
 TEST(GregorianDateTest, AddDays_NextDay)
 {
     gregorian::Date d(2024, gregorian::Month::March, 10);
@@ -126,12 +132,29 @@ TEST(GregorianDateTest, Epoch)
 {
     EXPECT_EQ(gregorian::Date(1990, gregorian::Month::January, 1).getEpoch(), 0);
     EXPECT_EQ(gregorian::Date(2026, gregorian::Month::May, 3).getEpoch(), 13271);
+    EXPECT_EQ(gregorian::Date((epoch_t)0), gregorian::Date(1990, gregorian::Month::January, 1));
+    EXPECT_FALSE(gregorian::Date(1990, gregorian::Month::January, 1).isLeapYear());
+    EXPECT_EQ(gregorian::Date((epoch_t)365), gregorian::Date(1991, gregorian::Month::January, 1));
+    EXPECT_EQ(gregorian::Date((epoch_t)13271), gregorian::Date(2026, gregorian::Month::May, 3));
+
+    for(epoch_t i = 0; i < 30000; i++) {
+        gregorian::Date d(i);
+        EXPECT_EQ(d, gregorian::Date(d.getEpoch()));
+        if(i > 0) {
+            EXPECT_TRUE(gregorian::Date(i - 1) < gregorian::Date(i));
+        }
+    }
 }
 
 TEST(GregorianDateTest, DateArithmetic)
 {
     EXPECT_EQ(gregorian::Date(2026, gregorian::Month::June, 30) - gregorian::Date(2026, gregorian::Month::June, 5), 25);
     EXPECT_EQ(gregorian::Date(2026, gregorian::Month::June, 5) - gregorian::Date(2026, gregorian::Month::June, 30), -25);
+}
+
+TEST(GregorianDateTest, FromDayOfYear)
+{
+    EXPECT_EQ(gregorian::Date::fromDayOfYear(2026, 32), gregorian::Date(2026, gregorian::Month::February, 1));
 }
 
 TEST(LunarPhaseTest, LunarPhaseTable)
@@ -152,6 +175,21 @@ TEST(EasterTest, EasterCalc)
     EXPECT_EQ(gregorian::getEaster(2026), gregorian::Date(2026, gregorian::Month::April, 5));
 }
 
+TEST(EthiopianDateTest, Epoch)
+{
+    EXPECT_EQ(ethiopian::Date(1982, ethiopian::Month::Tahsas, 23).getEpoch(), 0);
+    EXPECT_EQ(ethiopian::Date((epoch_t)0), ethiopian::Date(1982, ethiopian::Month::Tahsas, 23));
+    EXPECT_EQ(ethiopian::Date((epoch_t)8), ethiopian::Date(1982, ethiopian::Month::Tir, 1));
+    EXPECT_EQ(ethiopian::Date((epoch_t)253), ethiopian::Date(1983, ethiopian::Month::Meskerem, 1));
+    for(epoch_t i = 0; i < 30000; i++) {
+        ethiopian::Date d(i);
+        EXPECT_EQ(d, ethiopian::Date(d.getEpoch()));
+        if(i > 0) {
+            EXPECT_TRUE(ethiopian::Date(i - 1) < ethiopian::Date(i));
+        }
+    }
+}
+
 TEST(ConversionTests, Ethiopian)
 {
     ethiopian::Date d = toEthiopian(gregorian::Date(2026, gregorian::Month::September, 11));
@@ -162,6 +200,15 @@ TEST(ConversionTests, Ethiopian)
     d = toEthiopian(gregorian::Date(2026, gregorian::Month::May, 4));
     EXPECT_EQ(d, ethiopian::Date(2018, ethiopian::Month::Miyazya, 26));
     EXPECT_EQ(ethiopian::fromDayOfYear(2018, 31), ethiopian::Date(2018, ethiopian::Month::Tikimt, 1));
+    EXPECT_EQ(toGregorian(ethiopian::Date(1982, ethiopian::Month::Tahsas, 23)), gregorian::Date(1990, gregorian::Month::January, 1));
+    for(epoch_t i = 0; i < 30000; i++) {
+        ethiopian::Date ed(i);
+        gregorian::Date gd(i);
+        EXPECT_EQ(ed.getEpoch(), gd.getEpoch());
+        EXPECT_EQ(ed.getEpoch(), i);
+        EXPECT_EQ(ed, toEthiopian(gd));
+        EXPECT_EQ(gd, toGregorian(ed));
+    }
 }
 
 int main(int argc, char** argv)

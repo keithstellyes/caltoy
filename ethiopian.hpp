@@ -28,6 +28,9 @@ namespace ethiopian {
         Luke
     };
 
+    const int EPOCH_YEAR = 1982;
+    const Month EPOCH_MONTH = Month::Tahsas;
+    const uint8_t EPOCH_DAY = 23;
     std::string to_string(Month m) {
         switch (m) {
             case Month::Meskerem: return "Meskerem";
@@ -62,15 +65,35 @@ namespace ethiopian {
     {
         return (year % 4 == 3);
     }
+    const int DAYS_BETWEEN_EPOCH_AND_NEXT_YEAR = (30 - EPOCH_DAY) + (8 * 30) + daysInMonth(Month::Pagume, yearIsLeapYear(EPOCH_YEAR));
+
     Evangelist evangelistForYear(int year)
     {
         Evangelist result = static_cast<Evangelist>(year % 4);
         assert((result == Evangelist::Luke) == yearIsLeapYear(year));
         return result;
     }
-
+    constexpr int daysInYear(int year)
+    {
+        return 365 + (yearIsLeapYear(year) ? 1 : 0);
+    }
     class Date
     {
+        private:
+            constexpr Date nextDay() const
+            {
+                if(day + 1 <= daysInMonth(month, isLeapYear())) {
+                    return Date(year, month, day + 1);
+                }
+                assert(day + 1 == (daysInMonth(month, isLeapYear()) + 1));
+                Date result(*this);
+                result.month = static_cast<Month>((static_cast<int>(month) + 1) % 13);
+                result.day = 1;
+                if(result.month == Month::Meskerem) {
+                    result.year++;
+                }
+                return result;
+            }
         public:
             int year;
             Month month;
@@ -80,6 +103,65 @@ namespace ethiopian {
                 this->year = year;
                 this->month = month;
                 this->day = day;
+                if(day < 1 || day > 30) {
+                    throw std::runtime_error("Impossible day!");
+                }
+            }
+
+            constexpr static Date fromDayOfYear(int ethiopianYear, int dayOfYear)
+            {
+                if(dayOfYear < 1 || dayOfYear > 366) {
+                    throw std::runtime_error("Invalid day-of-year for Ethiopian calendar: " + std::to_string(dayOfYear));
+                }
+                if(ethiopianYear <= 1900-8 || ethiopianYear >= 2100 - 8) {
+                    throw std::runtime_error("Not year implemented");
+                }
+                if(dayOfYear <= 360)
+                {
+                    uint8_t day = ((dayOfYear - 1) % 30) + 1 /* adjust for -1 for mod logic to play nice*/;
+                    Month month = static_cast<Month>((dayOfYear - 1) / 30);
+                    return Date(ethiopianYear, month, day);
+                }
+                return Date(ethiopianYear, Month::Pagume, dayOfYear - 360);
+            }
+            constexpr epoch_t getEpoch() const
+            {
+                if(year < EPOCH_YEAR) {
+                    throw std::runtime_error("Not yet implemented!");
+                } else if(year == EPOCH_YEAR) {
+                    if(*this == getEpochDate()) {
+                        return 0;
+                    } else if(month < EPOCH_MONTH) {
+                        throw std::runtime_error("Not yet implemented!");
+                    } else if(month == EPOCH_MONTH) {
+                        return day - EPOCH_DAY;
+                    } else {
+                        return getDayOfYear() - getEpochDate().getDayOfYear();
+                    }
+                }
+                int y = EPOCH_YEAR + 1;
+                epoch_t epoch = DAYS_BETWEEN_EPOCH_AND_NEXT_YEAR;
+                while(y < this->year) {
+                    epoch += daysInYear(y);
+                    y++;
+                }
+                return epoch + getDayOfYear();
+            }
+            constexpr Date addDays(int days) const
+            {
+                return Date(getEpoch() + days);
+            }
+            constexpr Date(epoch_t epoch)
+            {
+                if(epoch < 0) {
+                    throw std::runtime_error("Not yet implemented");
+                }
+                Date result(EPOCH_YEAR, EPOCH_MONTH, EPOCH_DAY);
+                while(epoch--) {
+                    // naive
+                    result = result.nextDay();
+                }
+                *this = result;
             }
             constexpr int getDayOfYear() const
             {
@@ -91,6 +173,10 @@ namespace ethiopian {
             constexpr bool isLeapYear() const
             {
                 return yearIsLeapYear(this->year);
+            }
+            constexpr static Date getEpochDate()
+            {
+                return Date(EPOCH_YEAR, EPOCH_MONTH, EPOCH_DAY);
             }
             bool operator==(const Date& other) const
             {
@@ -148,19 +234,7 @@ namespace ethiopian {
 
     constexpr Date fromDayOfYear(int ethiopianYear, int dayOfYear)
     {
-        if(dayOfYear < 1 || dayOfYear > 366) {
-            throw std::runtime_error("Invalid day-of-year for Ethiopian calendar: " + std::to_string(dayOfYear));
-        }
-        if(ethiopianYear <= 1900-8 || ethiopianYear >= 2100 - 8) {
-            throw std::runtime_error("Not year implemented");
-        }
-        if(dayOfYear <= 360)
-        {
-            uint8_t day = ((dayOfYear - 1) % 30) + 1 /* adjust for -1 for mod logic to play nice*/;
-            Month month = static_cast<Month>((dayOfYear - 1) / 30);
-            return Date(ethiopianYear, month, day);
-        }
-        return Date(ethiopianYear, Month::Pagume, dayOfYear - 360);
+        return Date::fromDayOfYear(ethiopianYear, dayOfYear);
     }
 }
 

@@ -63,6 +63,34 @@ namespace gregorian {
                     throw std::runtime_error("Not that many days in this month");
                 }
             }
+            constexpr static Date fromDayOfYear(int gregorianYear, int dayOfYear)
+            {
+                if(dayOfYear < 1 || dayOfYear > daysInYear(gregorianYear) || gregorianYear < 1500) {
+                    throw std::runtime_error("Bad input for fromDayOfYear... got dayOfYear=" + std::to_string(dayOfYear) + ", gregorianYear=" + std::to_string(gregorianYear));
+                }
+                bool isLy = yearIsLeapYear(gregorianYear);
+                for(const Month &month : getAllMonths()) {
+                    if(gregorian::daysInMonth(month, isLy) >= dayOfYear) {
+                        return gregorian::Date(gregorianYear, month, dayOfYear);
+                    }
+                    dayOfYear -= gregorian::daysInMonth(month, isLy);
+                }
+                assert(false);
+            }
+
+            constexpr Date(epoch_t epoch)
+            {
+                if(epoch < 0) {
+                    throw std::runtime_error("Not yet implemented");
+                }
+                int year = EPOCH_YEAR;
+                while(daysInYear(year) - 1 < epoch) {
+                    epoch -= daysInYear(year);
+                    year++;
+                }
+                Date target = fromDayOfYear(year, epoch + 1);
+                *this = target;
+            }
             constexpr bool isLeapYear() const
             {
                 return yearIsLeapYear(year);
@@ -117,20 +145,9 @@ namespace gregorian {
                 return !(*this < other);
             }
 
-            // naive algorithm
             constexpr Date addDays(int days) const
             {
-                if(days < 0) {
-                    throw std::runtime_error("Not yet implemented");
-                }
-                int newDayInMonth = days + this->day;
-                if(newDayInMonth <= gregorian::daysInMonth(month, isLeapYear())) {
-                    return Date(year, month, newDayInMonth);
-                }
-                Month nextMonth = static_cast<Month>((static_cast<int>(month) + 1) % 12);
-                int nextYear = year + (nextMonth == Month::January ? 1 : 0);
-                int daysToReachEndOfMonth = gregorian::daysInMonth(month, isLeapYear()) - this->day + 1;
-                return Date(nextYear, nextMonth, 1).addDays(days - daysToReachEndOfMonth);
+                return Date(getEpoch() + days);
             }
 
             // Sakamoto algorithm? https://stackoverflow.com/a/905468
@@ -153,12 +170,6 @@ namespace gregorian {
                 return daysPriorToThisMonth + day;
             }
     };
-        constexpr Date fromDayOfYear(int gregorianYear, int dayOfYear)
-    {
-        assert(dayOfYear >= 1 && dayOfYear <= 366);
-        assert(gregorianYear >= 1500);
-        return Date(gregorianYear, Month::January, 1).addDays(dayOfYear - 1);
-    }
     std::string to_string(const Date& d)
     {
         std::ostringstream oss;
