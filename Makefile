@@ -6,9 +6,9 @@ CXXFLAGS += $(shell pkg-config --cflags Qt6Widgets)
 TARGETS := tests lunar-for-year lunar-calendar-qt
 
 # Source files
-TEST_SRCS := tests.cpp
-LUNAR_SRCS := lunar-for-year.cpp
-LUNAR_CAL_SRCS := lunar-calendar-qt.cpp
+TEST_SRCS := src/tests.cpp
+LUNAR_SRCS := src/lunar-for-year.cpp
+LUNAR_CAL_SRCS := src/lunar-calendar-qt.cpp
 
 # Object files
 TEST_OBJS := $(TEST_SRCS:.cpp=.o)
