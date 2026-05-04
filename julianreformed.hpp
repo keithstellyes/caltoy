@@ -19,6 +19,19 @@ namespace julianreformed {
         November,
         December
     };
+    inline Month& operator++(Month& m)
+    {
+        m = static_cast<Month>((static_cast<int>(m) + 1) % 12);
+        return m;
+    }
+
+    inline Month operator++(Month& m, int)
+    {
+        Month old = m;
+        ++m;
+        return old;
+    }
+
     enum class DayOfWeek {
         Sunday,
         Monday,
@@ -61,6 +74,15 @@ namespace julianreformed {
                 return -1;
         }
     }
+    class Date
+    {
+        protected:
+            Date() {}
+        public:
+            int year;
+            Month month;
+            uint8_t day;
+    };
 }
 constexpr std::string_view to_string(julianreformed::Month month)
 {

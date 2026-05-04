@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "julianreformed.hpp"
+#include <cassert>
 
 namespace gregorian {
     using Month = julianreformed::Month;
@@ -24,18 +25,6 @@ namespace gregorian {
         }
         return months;
     }
-    inline Month& operator++(Month& m)
-    {
-        m = static_cast<Month>((static_cast<int>(m) + 1) % 12);
-        return m;
-    }
-
-    inline Month operator++(Month& m, int)
-    {
-        Month old = m;
-        ++m;
-        return old;
-    }
 }
 
 namespace gregorian {
@@ -44,22 +33,27 @@ namespace gregorian {
         return (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
     }
     using DayOfWeek = julianreformed::DayOfWeek;
-    class Date
+    class Date : public julianreformed::Date
     {
         public:
-            int year;
-            Month month;
-            uint8_t day;
-            constexpr Date() : year(2026), month(Month::January), day(1) {}
-            constexpr Date(int year, Month month, uint8_t day) : year(year), month(month), day(day)
-        {
-            if(day == 0) {
-                throw std::runtime_error("All days in a  calendar must be at least 1!");
+            constexpr Date()
+            {
+                this->year = 2026;
+                this->month = Month::January;
+                this->day = 1;
             }
-            if(day > gregorian::daysInMonth(month, yearIsLeapYear(year))) {
-                throw std::runtime_error("Not that many days in this month");
+            constexpr Date(int year, Month month, uint8_t day)
+            {
+                this->year = year;
+                this->month = month;
+                this->day = day;
+                if(day == 0) {
+                    throw std::runtime_error("All days in a calendar must be at least 1!");
+                }
+                if(day > gregorian::daysInMonth(month, yearIsLeapYear(year))) {
+                    throw std::runtime_error("Not that many days in this month");
+                }
             }
-        }
             constexpr bool isLeapYear() const
             {
                 return yearIsLeapYear(year);
@@ -138,7 +132,12 @@ namespace gregorian {
                 return daysPriorToThisMonth + day;
             }
     };
-
+        constexpr Date fromDayOfYear(int gregorianYear, int dayOfYear)
+    {
+        assert(dayOfYear >= 1 && dayOfYear <= 366);
+        assert(gregorianYear >= 1500);
+        return Date(gregorianYear, Month::January, 1).addDays(dayOfYear - 1);
+    }
     std::string to_string(const Date& d)
     {
         std::ostringstream oss;
@@ -149,8 +148,27 @@ namespace gregorian {
         return oss.str();
     }
 
-    std::ostream& operator<<(std::ostream& os, const Date& d) {
+    std::ostream& operator<<(std::ostream& os, const Date& d)
+    {
         return os << to_string(d);
     }
 
+    constexpr int operator-(const Date &lhs, const Date &rhs)
+    {
+        if(rhs > lhs) {
+            return -(rhs - lhs);
+        } else if(lhs == rhs) {
+            return 0;
+        }
+        int difference = 0;
+        Date today(rhs);
+        // extremely naive
+        while(today != lhs) {
+            difference += 1;
+            today = today.addDays(1);
+        }
+        return difference;
+    }
+
 }
+

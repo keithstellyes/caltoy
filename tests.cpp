@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "lunar.hpp"
 #include "easter.hpp"
+#include "conversion.hpp"
 
 // --- Helper for comparisons ---
 static void ExpectDateEq(const gregorian::Date& d, int y, gregorian::Month m, uint8_t day)
@@ -128,6 +129,8 @@ TEST(GregorianDateTest, DayOfYear)
 {
     gregorian::Date d(2026, gregorian::Month::December, 31);
     EXPECT_EQ(d.getDayOfYear(), 365);
+    d = gregorian::Date(2026, gregorian::Month::May, 3);
+    EXPECT_EQ(d.getDayOfYear(), 123);
 }
 
 TEST(LunarPhaseTest, LunarPhaseTable)
@@ -146,6 +149,18 @@ TEST(EasterTest, EasterCalc)
 {
     EXPECT_EQ(gregorian::getEaster(2025), gregorian::Date(2025, gregorian::Month::April, 20));
     EXPECT_EQ(gregorian::getEaster(2026), gregorian::Date(2026, gregorian::Month::April, 5));
+}
+
+TEST(ConversionTests, Ethiopian)
+{
+    ethiopian::Date d = toEthiopian(gregorian::Date(2026, gregorian::Month::September, 11));
+    EXPECT_EQ(d, ethiopian::Date(2019, ethiopian::Month::Meskerem, 1));
+    EXPECT_EQ(ethiopian::fromDayOfYear(2018, 235), ethiopian::Date(ethiopian::Date(2018, ethiopian::Month::Miyazya, 25)));
+    d = toEthiopian(gregorian::Date(2026, gregorian::Month::September, 12));
+    EXPECT_EQ(d, ethiopian::Date(2019, ethiopian::Month::Meskerem, 2));
+    d = toEthiopian(gregorian::Date(2026, gregorian::Month::May, 4));
+    EXPECT_EQ(d, ethiopian::Date(2018, ethiopian::Month::Miyazya, 26));
+    EXPECT_EQ(ethiopian::fromDayOfYear(2018, 31), ethiopian::Date(2018, ethiopian::Month::Tikimt, 1));
 }
 
 int main(int argc, char** argv)
