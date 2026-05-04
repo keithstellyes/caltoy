@@ -2,6 +2,8 @@ CXX := g++
 CXXFLAGS := -std=c++23 -Wall -Wextra -pedantic -O2 -MMD -MP -fPIC
 CXXFLAGS += $(shell pkg-config --cflags Qt6Widgets)
 
+BUILD_DIR := build/
+
 # Targets
 TARGETS := tests lunar-for-year lunar-calendar-qt
 
@@ -11,10 +13,9 @@ LUNAR_SRCS := src/lunar-for-year.cpp
 LUNAR_CAL_SRCS := src/lunar-calendar-qt.cpp
 
 # Object files
-TEST_OBJS := $(TEST_SRCS:.cpp=.o)
-LUNAR_OBJS := $(LUNAR_SRCS:.cpp=.o)
-LUNAR_CAL_OBJS := $(LUNAR_CAL_SRCS:.cpp=.o)
-
+TEST_OBJS := $(patsubst src/%.cpp,$(BUILD_DIR)/%.o,$(TEST_SRCS))
+LUNAR_OBJS := $(patsubst src/%.cpp,$(BUILD_DIR)/%.o,$(LUNAR_SRCS))
+LUNAR_CAL_OBJS := $(patsubst src/%.cpp,$(BUILD_DIR)/%.o,$(LUNAR_CAL_SRCS))
 # Dependency files
 DEPS := $(TEST_OBJS:.o=.d) $(LUNAR_OBJS:.o=.d) $(LUNAR_CAL_OBJS:.o=.d)
 
@@ -32,7 +33,8 @@ lunar-calendar-qt: $(LUNAR_CAL_OBJS)
 	$(CXX) $(CXXFLAGS) $(shell pkg-config --libs Qt6Widgets) -o $@ $^
 
 # Compile rule
-%.o: %.cpp
+$(BUILD_DIR)/%.o: src/%.cpp
+	mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 # Include dependency files if they exist
@@ -40,7 +42,7 @@ lunar-calendar-qt: $(LUNAR_CAL_OBJS)
 
 # Clean
 clean:
-	rm -f *.o *.d $(TARGETS)
+	rm -f $(BUILD_DIR)/* $(TARGETS)
 
 rebuild: clean all
 
