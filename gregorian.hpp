@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "julianreformed.hpp"
+#include "epoch.hpp"
 #include <cassert>
 
 namespace gregorian {
@@ -28,13 +29,21 @@ namespace gregorian {
 }
 
 namespace gregorian {
+    const int EPOCH_YEAR = 1990;
+    const Month EPOCH_MONTH = Month::January;
+    const uint8_t EPOCH_DAY = 1;
     constexpr bool yearIsLeapYear(int year)
     {
         return (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
     }
+    constexpr int daysInYear(int year)
+    {
+        return 365 + (yearIsLeapYear(year) ? 1 : 0);
+    }
     using DayOfWeek = julianreformed::DayOfWeek;
     class Date : public julianreformed::Date
     {
+        private:
         public:
             constexpr Date()
             {
@@ -57,6 +66,18 @@ namespace gregorian {
             constexpr bool isLeapYear() const
             {
                 return yearIsLeapYear(year);
+            }
+            constexpr epoch_t getEpoch() const
+            {
+                if(year < EPOCH_YEAR) {
+                    throw std::runtime_error("Not yet implemented!");
+                }
+                int days = 0;
+                // naive
+                for(int y = EPOCH_YEAR; y < year; y++) {
+                    days += daysInYear(y);
+                }
+                return days + getDayOfYear() - 1;
             }
             bool operator==(const Date& other) const
             {
@@ -155,19 +176,7 @@ namespace gregorian {
 
     constexpr int operator-(const Date &lhs, const Date &rhs)
     {
-        if(rhs > lhs) {
-            return -(rhs - lhs);
-        } else if(lhs == rhs) {
-            return 0;
-        }
-        int difference = 0;
-        Date today(rhs);
-        // extremely naive
-        while(today != lhs) {
-            difference += 1;
-            today = today.addDays(1);
-        }
-        return difference;
+        return lhs.getEpoch() - rhs.getEpoch();
     }
 
 }

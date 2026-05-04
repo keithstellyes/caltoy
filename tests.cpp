@@ -3,15 +3,12 @@
 #include "easter.hpp"
 #include "conversion.hpp"
 
-// --- Helper for comparisons ---
 static void ExpectDateEq(const gregorian::Date& d, int y, gregorian::Month m, uint8_t day)
 {
     EXPECT_EQ(d.year, y);
     EXPECT_EQ(d.month, m);
     EXPECT_EQ(d.day, day);
 }
-
-// --- Constructor tests ---
 
 TEST(GregorianDateTest, DefaultConstructor)
 {
@@ -25,8 +22,6 @@ TEST(GregorianDateTest, ParameterizedConstructor)
     ExpectDateEq(d, 2024, gregorian::Month::March, 15);
 }
 
-// --- Leap year tests ---
-
 TEST(GregorianDateTest, LeapYear_True)
 {
     gregorian::Date d(2024, gregorian::Month::January, 1);
@@ -38,8 +33,6 @@ TEST(GregorianDateTest, LeapYear_False)
     gregorian::Date d(2023, gregorian::Month::January, 1);
     EXPECT_FALSE(d.isLeapYear());
 }
-
-// --- addDays basic tests ---
 
 TEST(GregorianDateTest, AddDays_SameMonth)
 {
@@ -65,8 +58,6 @@ TEST(GregorianDateTest, AddDays_CrossMonth)
     ExpectDateEq(result, 2024, gregorian::Month::April, 2);
 }
 
-// --- February / leap year edge cases ---
-
 TEST(GregorianDateTest, AddDays_February_NonLeap)
 {
     gregorian::Date d(2023, gregorian::Month::February, 27);
@@ -90,8 +81,6 @@ TEST(GregorianDateTest, AddDays_February_Leap_Cross)
 
     ExpectDateEq(result, 2024, gregorian::Month::March, 1);
 }
-
-// --- Year boundary ---
 
 TEST(GregorianDateTest, AddDays_EndOfYear)
 {
@@ -131,6 +120,18 @@ TEST(GregorianDateTest, DayOfYear)
     EXPECT_EQ(d.getDayOfYear(), 365);
     d = gregorian::Date(2026, gregorian::Month::May, 3);
     EXPECT_EQ(d.getDayOfYear(), 123);
+}
+
+TEST(GregorianDateTest, Epoch)
+{
+    EXPECT_EQ(gregorian::Date(1990, gregorian::Month::January, 1).getEpoch(), 0);
+    EXPECT_EQ(gregorian::Date(2026, gregorian::Month::May, 3).getEpoch(), 13271);
+}
+
+TEST(GregorianDateTest, DateArithmetic)
+{
+    EXPECT_EQ(gregorian::Date(2026, gregorian::Month::June, 30) - gregorian::Date(2026, gregorian::Month::June, 5), 25);
+    EXPECT_EQ(gregorian::Date(2026, gregorian::Month::June, 5) - gregorian::Date(2026, gregorian::Month::June, 30), -25);
 }
 
 TEST(LunarPhaseTest, LunarPhaseTable)
