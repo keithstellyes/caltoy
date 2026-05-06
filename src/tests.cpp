@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include "astrojulian.hpp"
 #include "lunar.hpp"
 #include "easter.hpp"
 #include "conversion.hpp"
@@ -209,6 +210,13 @@ TEST(ConversionTests, Ethiopian)
         EXPECT_EQ(ed, toEthiopian(gd));
         EXPECT_EQ(gd, toGregorian(ed));
     }
+}
+
+TEST(AstroJulianTest, getJulianDays)
+{
+    // Sputnik launch, example from Astronomical Algorithms, 2nd ed.
+    // modified slightly, it calls the day "4.8", however I think for our purposes this will be "good enough"
+    EXPECT_NEAR(astrojulian::getJulianDay(gregorian::Date(1957, gregorian::Month::October, 5)), 2436116.31, .3);
 }
 
 int main(int argc, char** argv)
