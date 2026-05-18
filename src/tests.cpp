@@ -212,11 +212,25 @@ TEST(ConversionTests, Ethiopian)
     }
 }
 
+TEST(ConversionTests, Julian)
+{
+    for(epoch_t i = 0; i < 30000; i++) {
+        julian::Date jd(i);
+        gregorian::Date gd(i);
+        EXPECT_EQ(jd.getEpoch(), gd.getEpoch());
+        EXPECT_EQ(jd, toJulian(gd));
+        EXPECT_EQ(gd, toGregorian(jd));
+    }
+}
+
 TEST(AstroJulianTest, getJulianDays)
 {
     // Sputnik launch, example from Astronomical Algorithms, 2nd ed.
     // modified slightly, it calls the day "4.8", however I think for our purposes this will be "good enough"
     EXPECT_NEAR(astrojulian::getJulianDay(gregorian::Date(1957, gregorian::Month::October, 5)), 2436116.31, .3);
+    // given example from table on page 62
+    EXPECT_NEAR(astrojulian::getJulianDay(gregorian::Date(1999, gregorian::Month::January, 1)), 2451179.5, .001);
+    EXPECT_NEAR(astrojulian::getJulianDay(gregorian::Date(1987, gregorian::Month::January, 27)), 2446822.5, .001);
 }
 
 int main(int argc, char** argv)

@@ -1,3 +1,4 @@
+#pragma once
 /*
  * for calendars that were used after the reforms of Julius Caesar in 46 BC
  * The Julian and Gregorian calendars are the exact same except for two differences:

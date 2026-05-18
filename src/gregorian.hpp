@@ -26,9 +26,6 @@ namespace gregorian {
         }
         return months;
     }
-}
-
-namespace gregorian {
     const int EPOCH_YEAR = 1990;
     const Month EPOCH_MONTH = Month::January;
     const uint8_t EPOCH_DAY = 1;
